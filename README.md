@@ -39,6 +39,32 @@ Each simulation runs the situation without any fix, shows what every fix does on
 
 All students, submissions and load numbers are made up and illustrative. Nothing touches a real server.
 
+## Change the scenario
+
+Every simulation number that matters can be changed from the command line. Each parameter has a default, so you only pass what you want to change. Values are checked, and a bad value or a parameter that does not belong to that simulation is refused with a message.
+
+```
+sdcli simulate q1 --students 3000 --servers 3
+sdcli simulate q2 --queue-limit 2 --workers 2 --recovery-minutes 5
+sdcli simulate q4 --capacity 8
+sdcli simulate q6 --students 300 --batch-size 10 --seed 3
+```
+
+| Parameter | Simulation | Default | Range | Meaning |
+| --- | --- | --- | --- | --- |
+| `--students` | q1, q6 | 1500 | 10 to 10000 | Students in the simulation |
+| `--servers` | q1 | 2 | 2 to 10 | Server copies behind the load balancer |
+| `--rate-limit` | q1 | 60 | 1 to 1000 | Requests per student per minute |
+| `--script-clients` | q1 | 10 | 0 to 100 | Script clients that spam the server |
+| `--queue-limit` | q2 | 4 | 1 to 50 | Jobs the queue can hold |
+| `--workers` | q2 | 1 | 1 to 10 | Background processors |
+| `--recovery-minutes` | q2 | 10 | 1 to 60 | Minutes in evaluating before a job is reset |
+| `--capacity` | q4 | 20 | 3 to 200 | Live help seats |
+| `--batch-size` | q6 | 30 | 5 to 500 | Students per batch |
+| `--seed` | q6 | 7 | 0 to 999999 | Random seed for the made-up students |
+
+With `--try` you can also change a parameter while playing, for example `set capacity 8`. The same seed always gives the same run.
+
 ## Problems covered
 
 | Id | Problem |
