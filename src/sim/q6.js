@@ -81,8 +81,10 @@ function boardLine(has, students, order, evaluated) {
   } else if (!global && evaluated < TOTAL) {
     lines.push("Your row: nothing is shown.");
   }
-  if (has("provisional") && global) {
-    lines.push(`Your rank: ${global.rank} of ${global.of} evaluated (provisional, it can change as more work is graded)`);
+  const finished = evaluated === TOTAL;
+  if ((has("provisional") || finished) && global) {
+    const note = finished ? "final" : "provisional, it can change as more work is graded";
+    lines.push(`Your rank: ${global.rank} of ${global.of} evaluated (${note})`);
     if (has("twoBoards")) {
       const batch = rankAmong(students, order, evaluated, YOU, (index) => batchOf(index) === batchOf(YOU));
       lines.push(`Batch board: ${batch.rank} of ${batch.of} evaluated in your batch. Global board: ${global.rank} of ${global.of}.`);
