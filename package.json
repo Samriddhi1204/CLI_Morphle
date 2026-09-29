@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node bin/sdcli.js",
-    "test": "node --test test/sim.test.js test/cli.test.js test/hygiene.test.js"
+    "test": "node --test test/sim.test.js test/cli.test.js test/params.test.js test/hygiene.test.js"
   },
   "engines": {
     "node": ">=18"

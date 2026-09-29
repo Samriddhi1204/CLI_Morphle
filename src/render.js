@@ -154,6 +154,7 @@ export function renderHelp() {
     "    --fixes a,b           run with exactly these fixes",
     "    --auto                play on a timer instead of pressing Enter",
     "    --fast                print everything at once",
+    "    --students 3000       change the scenario, see \"simulate\" for every parameter",
     "",
     style.bold("  ASSUMPTIONS"),
     ...ASSUMPTIONS.map((line) => `    - ${line}`),

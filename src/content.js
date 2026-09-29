@@ -14,7 +14,7 @@ export const PROBLEMS = [
     label: "Q1",
     menuTitle: "Many students hitting the server at once",
     title: "Many students hit the server at the same time",
-    oneLine: "1,500 students submit around the same deadline and the server struggles.",
+    oneLine: "Students submit around the same deadline and the server struggles.",
     aliases: "server crash overload traffic rush deadline load many students simultaneous submit submitting 1500 students",
     issues: [
       ["Single server", "Everything runs on a single server, so CPU or memory runs out near the deadline", "one server overload cpu memory crash"],

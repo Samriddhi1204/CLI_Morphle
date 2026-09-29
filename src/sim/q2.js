@@ -1,11 +1,9 @@
 import { createTrace } from "./trace.js";
 import { clock } from "../format.js";
+import { DEFAULTS } from "../params.js";
 
 export const LIMITS = {
-  queueCap: 4,
-  queueCapRaised: 8,
   evaluateMinutes: 2,
-  recoveryMinutes: 10,
   startMinute: 1,
 };
 
@@ -19,7 +17,8 @@ export const JOBS = [
   { id: "sub-1047", student: "S-107", kind: "ok" },
 ];
 
-export function play(active) {
+export function play(active, params = {}) {
+  const p = { ...DEFAULTS, ...params };
   const trace = createTrace();
   const has = (id) => active.has(id);
   const outcome = { marked: [], stuck: [], blocked: [], lost: [], failed: [], rejected: [], asked: [], wrongGrade: false };
@@ -34,7 +33,7 @@ export function play(active) {
   if (!has("logging")) trace.warn("Nothing is logged, so only what students see is shown below.");
 
   const queue = [];
-  const capacity = has("queueSize") ? LIMITS.queueCapRaised : LIMITS.queueCap;
+  const capacity = has("queueSize") ? p.queueLimit * 2 : p.queueLimit;
   for (const job of JOBS) {
     step(0, job.id, "received");
     if (job.kind === "corrupt" && has("uploadChecks")) {
@@ -77,7 +76,7 @@ export function play(active) {
     lastStep[id] = text;
     if (has("logging")) emit(minute, "log", `[${clock(minute)}] ${id} ${text}`);
   };
-  const workers = has("queueSize") ? 2 : 1;
+  const workers = p.workers + (has("queueSize") ? 1 : 0);
   const free = Array(workers).fill(LIMITS.startMinute);
   const pending = queue.map((job) => ({ ...job, readyAt: 0 }));
   const isolated = has("perStudent");
@@ -105,8 +104,8 @@ export function play(active) {
     if (job.kind === "crash") {
       emit(start, "bad", `[${clock(start)}] The server restarts while ${job.id} is being evaluated.`);
       if (has("recovery") && has("status")) {
-        const back = start + LIMITS.recoveryMinutes;
-        record(back, job.id, "still evaluating after 10 minutes, back to unmarked");
+        const back = start + p.recoveryMinutes;
+        record(back, job.id, `still evaluating after ${p.recoveryMinutes} minutes, back to unmarked`);
         emit(back, "good", `[${clock(back)}] ${job.id} is picked up again instead of staying stuck.`);
         pending.push({ ...job, kind: "ok", readyAt: back });
         free[worker] = isolated ? start + 1 : back;
@@ -115,7 +114,7 @@ export function play(active) {
         outcome.stuck.push(job.id);
         free[worker] = start + 1;
         if (!isolated) blockedBy = job.id;
-        const listed = start + LIMITS.recoveryMinutes;
+        const listed = start + p.recoveryMinutes;
         if (has("pending")) {
           emit(listed, "warn", `[${clock(listed)}] ${job.id} appears on the teacher's "Pending too long" list.`);
         } else {
@@ -176,6 +175,6 @@ export function play(active) {
   }
 
   const ok = outcome.marked.length + outcome.rejected.length === JOBS.length && !outcome.wrongGrade;
-  const summary = `marked ${outcome.marked.length} of ${JOBS.length}, stuck ${outcome.stuck.length}, blocked ${outcome.blocked.length}, lost ${outcome.lost.length}, failed ${outcome.failed.length}`;
+  const summary = `marked ${outcome.marked.length} of ${JOBS.length}, stuck ${outcome.stuck.length}, blocked ${outcome.blocked.length}, lost ${outcome.lost.length}, failed ${outcome.failed.length}${outcome.asked.length > 0 ? `, asked to retry ${outcome.asked.length}` : ""}`;
   return { events: trace.events, summary, ok, outcome };
 }

@@ -1,7 +1,6 @@
 import { createTrace } from "./trace.js";
 import { bar } from "../format.js";
-
-export const DEFAULT_CAPACITY = 20;
+import { DEFAULTS } from "../params.js";
 
 export const WAITING = [
   { name: "Meera", marks: 71, seatedLastTime: false },
@@ -31,29 +30,31 @@ function seatLine(count, capacity) {
   return `Seats ${bar(Math.min(count, capacity), capacity, 20)} ${count} / ${capacity}`;
 }
 
-export function play(active) {
+export function play(active, params = {}) {
+  const base = params.capacity ?? DEFAULTS.capacity;
+  const nearly = base - 1;
   const trace = createTrace();
   const has = (id) => active.has(id);
   const flags = { overCapacity: false, guestSeated: false, leftOut: 0, wastedSeat: false, slowJoin: false };
 
-  trace.head("Scene 1: someone who is not logged in clicks Join (18 of 20 seats taken)");
+  trace.head(`Scene 1: someone who is not logged in clicks Join (${base - 2} of ${base} seats taken)`);
   if (has("auth")) {
-    trace.good("The join is refused: \"Log in to join\". A logged-in student, Nisha, takes the next seat: 19 / 20.");
+    trace.good(`The join is refused: "Log in to join". A logged-in student, Nisha, takes the next seat: ${nearly} / ${base}.`);
   } else {
     flags.guestSeated = true;
-    trace.bad("A guest with no login took a seat: 19 / 20.");
+    trace.bad(`A guest with no login took a seat: ${nearly} / ${base}.`);
   }
   trace.pause();
 
   trace.head("Scene 2: Aarav and Meera click Join for the last seat at the same moment");
-  trace.visual(seatLine(19, DEFAULT_CAPACITY));
-  const race = simultaneousJoin({ seated: 19, capacity: DEFAULT_CAPACITY, oneStep: has("oneStep"), clickers: ["Aarav", "Meera"] });
-  if (race.seatedAfter > DEFAULT_CAPACITY) {
+  trace.visual(seatLine(nearly, base));
+  const race = simultaneousJoin({ seated: nearly, capacity: base, oneStep: has("oneStep"), clickers: ["Aarav", "Meera"] });
+  if (race.seatedAfter > base) {
     flags.overCapacity = true;
-    trace.log("Aarav checks: 19 seated. Meera checks: 19 seated. Both see room.");
-    trace.bad(`Both were added. ${seatLine(race.seatedAfter, DEFAULT_CAPACITY)}  over capacity`);
+    trace.log(`Aarav checks: ${nearly} seated. Meera checks: ${nearly} seated. Both see room.`);
+    trace.bad(`Both were added. ${seatLine(race.seatedAfter, base)}  over capacity`);
   } else {
-    trace.good(`The seat is reserved in one database step. Aarav gets it. ${seatLine(race.seatedAfter, DEFAULT_CAPACITY)}`);
+    trace.good(`The seat is reserved in one database step. Aarav gets it. ${seatLine(race.seatedAfter, base)}`);
     if (has("waitlist")) {
       trace.good("Meera sees \"Session full\" and is number 1 on the waiting list.");
     } else {
@@ -63,14 +64,14 @@ export function play(active) {
   }
   trace.pause();
 
-  trace.head("Scene 3: two groups of 20 join the empty session together");
-  const capacity = has("capacity") ? 30 : DEFAULT_CAPACITY;
+  trace.head(`Scene 3: two groups of ${base} join the empty session together`);
+  const capacity = has("capacity") ? base + 10 : base;
   if (has("capacity")) {
-    trace.info("The teacher raises the capacity setting to 30 for this session.");
+    trace.info(`The teacher raises the capacity setting to ${capacity} for this session.`);
   } else {
-    trace.info("Capacity is fixed at 20.");
+    trace.info(`Capacity is fixed at ${base}.`);
   }
-  const clickers = Array.from({ length: 40 }, (_, index) => `student-${index + 1}`);
+  const clickers = Array.from({ length: base * 2 }, (_, index) => `student-${index + 1}`);
   const groups = simultaneousJoin({ seated: 0, capacity, oneStep: has("oneStep"), clickers });
   if (groups.seatedAfter > capacity) {
     flags.overCapacity = true;
