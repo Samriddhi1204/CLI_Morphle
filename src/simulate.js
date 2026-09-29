@@ -17,7 +17,7 @@ function issueLines(sim) {
 function printReference(sim, io) {
   io.write("");
   io.write(style.bold(style.cyan("  POSSIBLE ISSUES")));
-  issueLines(sim).forEach((line) => io.write(wrapText(line.trim(), 90, "    ")));
+  issueLines(sim).forEach((line) => io.write(wrapText(line.trim(), 90, "    ", "   ")));
   if (sim.problem.confirm) {
     io.write("");
     io.write(style.bold(style.cyan("  HOW I'D CONFIRM THE CAUSE")));
@@ -48,16 +48,25 @@ async function runOnce(sim, active, io, mode, heading) {
   return result;
 }
 
+function describeEffect(alone, baseline, baselineLines) {
+  const baseParts = baseline.summary.split("; ");
+  const changedParts = alone.summary.split("; ").filter((part) => !baseParts.includes(part));
+  if (changedParts.length > 0) return changedParts.join("; ");
+  const added = alone.events.find((event) => event.text && event.kind !== "head" && !baselineLines.has(event.text));
+  if (!added) return "no visible change on its own, it works together with the other fixes";
+  const text = added.text.length > 88 ? `${added.text.slice(0, 85)}...` : added.text;
+  return `numbers unchanged, but now: ${text}`;
+}
+
 export async function runGuided(sim, io, mode) {
   printHeader(sim, io);
   const baseline = await runOnce(sim, EMPTY(), io, mode, "WITHOUT ANY FIX");
   io.write("");
   io.write(style.bold(style.cyan("--- ONE FIX AT A TIME ---")));
+  const baselineLines = new Set(baseline.events.map((event) => event.text));
   for (const fix of sim.fixes) {
     const alone = sim.play(new Set([fix.id]));
-    const changed = alone.summary !== baseline.summary;
-    const note = changed ? alone.summary : "no visible change on its own, it works together with the other fixes";
-    io.write(`  ${fix.label}: ${note}`);
+    io.write(`  ${fix.label}: ${describeEffect(alone, baseline, baselineLines)}`);
   }
   await runOnce(sim, allFixes(sim), io, mode, "WITH ALL FIXES");
   printReference(sim, io);

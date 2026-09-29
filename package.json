@@ -1,14 +1,14 @@
 {
   "name": "sdcli",
   "version": "1.0.0",
-  "description": "Offline system design assistant and simulator for a homework submission platform",
+  "description": "Offline system design guide and simulator for a homework submission platform",
   "type": "module",
   "bin": {
     "sdcli": "bin/sdcli.js"
   },
   "scripts": {
     "start": "node bin/sdcli.js",
-    "test": "node --test test/"
+    "test": "node --test test/sim.test.js test/cli.test.js test/hygiene.test.js"
   },
   "engines": {
     "node": ">=18"

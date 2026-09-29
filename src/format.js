@@ -29,19 +29,20 @@ export function clock(minute, startHour = 10) {
   return `${hours}:${minutes}`;
 }
 
-export function wrapText(text, width = 76, indent = "") {
+export function wrapText(text, width = 76, indent = "", hang = "") {
   const words = String(text).split(/\s+/).filter(Boolean);
   const lines = [];
   let current = "";
   for (const word of words) {
-    if (current && (indent + current + " " + word).length > width) {
-      lines.push(indent + current);
+    const prefix = lines.length === 0 ? indent : indent + hang;
+    if (current && (prefix + current + " " + word).length > width) {
+      lines.push(prefix + current);
       current = word;
     } else {
       current = current ? `${current} ${word}` : word;
     }
   }
-  if (current) lines.push(indent + current);
+  if (current) lines.push((lines.length === 0 ? indent : indent + hang) + current);
   return lines.join("\n");
 }
 

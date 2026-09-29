@@ -65,6 +65,12 @@ export function findTie(students, order, evaluated) {
   return null;
 }
 
+function boardRows(has, evaluated) {
+  if (evaluated === 0) return "Board: no grades confirmed yet.";
+  if (!has("showAll")) return "Board: only the top 10 are visible, so most students cannot find themselves.";
+  return `Board: all ${evaluated} evaluated students are listed, your row is highlighted.`;
+}
+
 function boardLine(has, students, order, evaluated) {
   const name = (student) => (has("nickname") ? student.nickname : student.name);
   const me = students[YOU];
@@ -73,12 +79,12 @@ function boardLine(has, students, order, evaluated) {
   if (!has("provisional") && evaluated < TOTAL) {
     lines.push("Board: \"Results pending\" until every submission is graded.");
   } else {
-    lines.push(has("showAll") ? `Board: all ${evaluated} evaluated students are listed, your row is highlighted.` : "Board: only the top 10 are visible, so most students cannot find themselves.");
+    lines.push(boardRows(has, evaluated));
   }
   if (has("progress")) lines.push(`Progress: Evaluated: ${evaluated} of ${TOTAL.toLocaleString("en-US")}`);
   if (has("ownStatus")) {
     lines.push(`Your submission: ${statusOf(order, evaluated)}`);
-  } else if (!global && evaluated < TOTAL) {
+  } else if ((!global || !has("provisional")) && evaluated < TOTAL) {
     lines.push("Your row: nothing is shown.");
   }
   const finished = evaluated === TOTAL;
@@ -126,12 +132,22 @@ export function play(active) {
   if (has("twoBoards")) {
     const tie = findTie(students, order, 640);
     if (tie) {
-      trace.good(`Tie example: ${tie[0].marks} marks each. ${tie[0].minutes} min finishes ahead of ${tie[1].minutes} min, so finishing time breaks the tie.`);
+      const [faster, slower] = [...tie].sort((a, b) => a.minutes - b.minutes);
+      trace.good(`Tie example: ${faster.marks} marks each. ${faster.minutes} min finishes ahead of ${slower.minutes} min, so finishing time breaks the tie.`);
     }
   }
   trace.info(has("nickname") ? "Names are shown as nicknames, for example " + students[1].nickname + "." : `Real names of children are public, for example ${students[1].name}.`);
 
   const missing = ["showAll", "progress", "provisional", "ownStatus", "realtime", "twoBoards", "paging", "nickname"].filter((id) => !has(id));
-  const summary = missing.length === 0 ? "students see a live provisional rank, their status and a fast board" : `${missing.length} of 8 board features missing`;
+  const summary = [
+    `rows shown: ${has("showAll") ? "all" : "top 10 only"}`,
+    `progress line: ${has("progress") ? "shown" : "missing"}`,
+    `rank before grading ends: ${has("provisional") ? "provisional" : "hidden"}`,
+    `own status: ${has("ownStatus") ? "shown" : "blank"}`,
+    `updates: ${has("realtime") ? "live" : "on refresh"}`,
+    `boards: ${has("twoBoards") ? "batch and global" : "one"}`,
+    `board load: ${has("paging") ? "fast pages" : "3.0 s"}`,
+    `names: ${has("nickname") ? "nicknames" : "real names"}`,
+  ].join("; ");
   return { events: trace.events, summary, ok: missing.length === 0, outcome: { missing } };
 }

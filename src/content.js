@@ -15,7 +15,7 @@ export const PROBLEMS = [
     menuTitle: "Many students hitting the server at once",
     title: "Many students hit the server at the same time",
     oneLine: "1,500 students submit around the same deadline and the server struggles.",
-    aliases: "server crash overload traffic rush deadline load many students simultaneous",
+    aliases: "server crash overload traffic rush deadline load many students simultaneous submit submitting 1500 students",
     issues: [
       ["Single server", "Everything runs on a single server, so CPU or memory runs out near the deadline", "one server overload cpu memory crash"],
       ["Heavy work in the request", "Heavy work (saving and processing the PDF) happens inside the request, so requests take long and pile up", "slow requests pile up processing pdf inside request"],
@@ -28,7 +28,7 @@ export const PROBLEMS = [
       ["loadBalancer", "Load balancer", "Load balancer (like Nginx) with 2 or more copies of the server, so one failure does not take the site down", "nginx multiple servers copies distribute traffic"],
       ["queue", "Background queue", "Background queue: the request only saves the file and replies \"received\", the rest happens in the background", "async background processing received"],
       ["index", "Database index", "Database index on studentId and assignmentId", "index query speed slow database"],
-      ["stagger", "Staggered deadlines", "Staggered deadlines: students split into slots with a gap between them, each slot gets the same amount of time, deadline stored per student or slot", "slots gap spread deadlines different deadline"],
+      ["stagger", "Staggered deadlines", "Staggered deadlines: students split into slots with a gap between them, each slot gets the same amount of time, deadline stored per student or slot", "slots gap spread deadlines different deadline fair fairness"],
       ["reminders", "Reminders", "Reminders before each deadline so submissions do not bunch up at the last minute", "reminder notify early submit"],
     ],
     confirm: "Check CPU and memory at peak time, request duration in the logs, and the slowest queries.",
@@ -58,7 +58,7 @@ export const PROBLEMS = [
       ["results", "Results table", "Results table: finished work moves out of the queue into a separate results table", "evaluated data separate table move out of queue"],
       ["perStudent", "One job per student", "One job per student: each submission is its own job tied to that student's ID, so one stuck report cannot block or mix with another", "separate pipeline per student isolate"],
       ["pending", "Pending too long list", "\"Pending too long\" list for the teacher", "overdue pending list teacher"],
-      ["popup", "Teacher popup", "Teacher popup: \"Are you sure?\" with the score shown before grades are submitted (prevents accidents, does not fix stuck reports)", "confirm popup teacher sure before submitting grades"],
+      ["popup", "Teacher popup", "Teacher popup: \"Are you sure?\" with the score shown before grades are submitted (prevents accidents, does not fix stuck reports)", "confirm popup teacher sure before submitting grades mistake wrong score accident typo entered"],
     ],
     confirm: "Search the logs for the stuck submission's ID and see the last step it reached. Saved but never queued means a queueing problem. Started evaluating and stopped means a crash or error.",
     tradeoff: "More statuses and logs mean a bit more code, but nothing disappears silently.",
@@ -96,8 +96,8 @@ export const PROBLEMS = [
     oneLine: "Two students click Join for the last seat at the same moment.",
     aliases: "live help seats join capacity race condition waiting list groups session",
     issues: [
-      ["Check and add are two steps", "The code checks \"fewer than 20?\" and adds the student as two separate steps, so two students clicking together both see 19 and both get in, making it 21", "race condition last seat both get in 21 two steps"],
-      ["Both groups told there is room", "Both groups are told there is room", "both groups room over capacity"],
+      ["Check and add are two steps", "The code checks \"fewer than 20?\" and adds the student as two separate steps, so two students clicking together both see 19 and both get in, making it 21", "race condition last seat both get in 21 two steps join same time simultaneously click together two students over capacity"],
+      ["Both groups told there is room", "Both groups are told there is room", "both groups told room over capacity go over 20 limit exceeded"],
       ["Hard-coded capacity", "The capacity is hard-coded, with no waiting list as a fallback", "capacity fixed hard coded no waiting list"],
       ["No login needed", "Anyone can try to join without logging in", "not logged in guest join authentication"],
       ["Students who need help miss out", "Students who need help most may miss out", "left out weak students miss out"],
@@ -133,7 +133,7 @@ export const PROBLEMS = [
       ["fileChecks", "File checks", "File checks at upload: PDF only, size limit, not empty or corrupted", "pdf only size limit empty corrupted validate"],
       ["summary", "Student summary screen", "Summary screen before the student submits (name, assignment, file name, size, time), then confirm", "summary screen before submit confirm"],
       ["receipt", "Receipt", "Receipt with submission ID and time after submitting", "receipt submission id time"],
-      ["teacherPopup", "Teacher summary and popup", "Teacher summary and popup before final grades are saved (student, assignment, score, comments)", "teacher summary popup are you sure grades"],
+      ["teacherPopup", "Teacher summary and popup", "Teacher summary and popup before final grades are saved (student, assignment, score, comments)", "teacher summary popup are you sure grades mistake wrong score accident typo entered"],
       ["duplicate", "Duplicate check", "Duplicate check: flag the same file uploaded twice", "duplicate same file twice flag"],
       ["history", "History of changes", "History of changes: who, when, old value, new value", "change history audit who when old new"],
     ],
@@ -195,7 +195,7 @@ export const OTHER = {
     {
       id: "q7-2",
       title: "Deadline unfairness and time cheating",
-      aliases: "deadline unfair time cheating device clock server time slow internet",
+      aliases: "deadline unfair unfairness fair fairness time cheating device clock server time slow internet",
       wrong: [
         ["Device clock", "The deadline is checked using the student's device clock, so it can be changed", "device clock changed"],
         ["Slow internet", "Slow internet makes an on-time student look late", "slow internet late on time"],
@@ -212,7 +212,7 @@ export const OTHER = {
     {
       id: "q7-3",
       title: "Live help no-shows",
-      aliases: "live help no show seat wasted confirm release",
+      aliases: "live help no show noshow does not show up seat wasted confirm release",
       wrong: [
         ["Seat wasted", "A student takes a seat and never joins, so a seat is wasted while others wait", "seat wasted never joins"],
         ["Empty seats, long waiting list", "The teacher sits with empty seats and a long waiting list", "teacher empty seats long waiting list"],
@@ -227,7 +227,7 @@ export const OTHER = {
     {
       id: "q7-4",
       title: "Privacy of minors and access control",
-      aliases: "privacy minors children access control parent consent role based nickname logs private storage",
+      aliases: "privacy minors children data protect access control parent consent role based nickname logs private storage see whose another student homework",
       wrong: [
         ["Real names on the board", "The public leaderboard shows real names of children", "real names public leaderboard children"],
         ["Changing the ID in the URL", "A student could open another student's homework or marks by changing the ID in the URL", "change id url open another student homework"],
